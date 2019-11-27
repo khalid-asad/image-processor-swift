@@ -27,6 +27,7 @@ Now that we have our basics covered, we can dive into the Swift portion!
 
 Let's grab our image, then take the cgImage of it:
 
+![StockPhotoBanner](https://user-images.githubusercontent.com/37077623/69701626-31888b80-10a2-11ea-8f1f-cfefa84df86c.jpg)
 This image is pretty accurate of what I have to deal with on a daily basis!
 
 ```
@@ -34,6 +35,7 @@ guard let image = UIImage(named: "image"),
       let cgImage = image.cgImage 
 else { return }
 ```
+
 
 We want to redraw this image with a specific Image Core Graphics Context. So let's generate some things that we will need for this:
 
@@ -46,6 +48,7 @@ let height = Int(image.size.height)
 var bytesPerRow = width * 4
 let imageData = UnsafeMutablePointer<Pixel>.allocate(capacity: width * height)
 ```
+
 
 By generating an UnsafeMutablePointer with Pixels (We know from before they are composed of RGB values, as well as an Alpha multiplier), we can manipulate CGContext given information about the size and bitmap (32-bit, big endian format).
 
@@ -61,17 +64,20 @@ guard let imageContext = CGContext(
 ) else { return nil }
 ```
       
+      
 After generating our CGContext struct, we are ready to redraw the image.
 
 ```
 imageContext.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
 ```
 
+
 Now given that the pointer is generated and updated, we can continue to our interface of the buffer by starting at that pointer.
 
 ```
 let pixels = UnsafeMutableBufferPointer<Pixel>(start: imageData, count: width * height)
 ```
+
 
 Given this buffer pointer, we can iterate through each pixel to calculate the total individual amounts of RGB pixels.
 
@@ -87,6 +93,7 @@ for y in 0..<height {
 }
 ```
 
+
 Now calculate the averages by dividing by the pixel area.
 
 ```
@@ -94,6 +101,7 @@ let avgRed = totalRed / pixelArea
 let avgGreen = totalGreen / pixelArea
 let avgBlue = totalBlue / pixelArea
 ```
+
 
 Finally, we're ready to manipulate the pixels!
 
@@ -106,12 +114,14 @@ for y in 0..<height {
           let greenDelta = Int(pixel.green) - avgGreen
           let blueDelta = Int(pixel.blue) - avgBlue
           pixel.red = UInt8(max(min(255, avgRed + 2 * redDelta), 0))
-          pixel.blue = UInt8(max(min(255, avgBlue + 2 * blueDelta), 0)) .     pixel.green = UInt8(max(min(255, avgGreen + 2 * greenDelta), 0))
+          pixel.blue = UInt8(max(min(255, avgBlue + 2 * blueDelta), 0))     
+          pixel.green = UInt8(max(min(255, avgGreen + 2 * greenDelta), 0))
           
           pixels[index] = pixel
       }
 }
 ```
+
 
 The above code can be done any way you want to manipulate contrast. In our case, we simply want to increase the contrast. We can do this by adding a delta with a multiplier of 2 to each of the pixels. Remember the max value is 255, and the min is 0.
 
@@ -122,17 +132,26 @@ guard let newCGImage = context.makeImage() else { return nil }
 return UIImage(cgImage: newCGImage)
 ```
 
+
 Let's see how the output image turned out on the simulator!
+<img width="1048" alt="Screen Shot 2019-11-26 at 10 07 40 PM" src="https://user-images.githubusercontent.com/37077623/69701662-45cc8880-10a2-11ea-8a2e-3e2de70b7e4a.png">
+
 
 Now that we increased the contrast, we can see darker colors.Great! Let's try the reverse by decreasing the contrast by the delta.
 
 Woah! We created a photo negative!We decreased the contrast so much it ended up creating a photo negative!
+
+<img width="1048" alt="Screen Shot 2019-11-26 at 10 10 47 PM" src="https://user-images.githubusercontent.com/37077623/69701663-46651f00-10a2-11ea-9481-9958f0ff6407.png">
+
 
 Let's try Grayscale using this forumla:
 
 ```
 𝑦=0.3𝑅+0.6𝐺+0.1𝐵
 ```
+
+<img width="1048" alt="Screen Shot 2019-11-26 at 10 29 46 PM" src="https://user-images.githubusercontent.com/37077623/69701664-46651f00-10a2-11ea-8c34-9b5c8383b2a0.png">
+
 
 Cool!
 
