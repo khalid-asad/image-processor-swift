@@ -1,6 +1,3 @@
-# Image-Processor
-Applies filters on images like contrast enhancements or grayscale.
-
 # Simple low-level Image Processing in Swift with UIKit
 
 Ever thought about creating your own Instagram or Image Filtering application but didn't exactly know how to approach it? Have some old C++ code, but don't wanna go through all the wrappers? This guide is meant to show some of the basics of Image Processing all in Swift using only UIKit.
